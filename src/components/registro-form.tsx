@@ -656,27 +656,32 @@ export function RegistroForm() {
               </div>
             )}
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={
-                isSubmitting ||
-                emailValidation.status === "checking" ||
-                phoneValidation.status === "checking" ||
-                emailValidation.status === "duplicate" ||
-                phoneValidation.status === "duplicate"
-              }
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                "Registrarme"
-              )}
-            </Button>
+            {/* Spacer para botón flotante en móvil */}
+            <div className="h-20 sm:hidden" aria-hidden="true" />
+
+            {/* Submit Button - flotante en móvil, normal en desktop */}
+            <div className="floating-button-container fixed bottom-0 left-0 right-0 p-3 bg-background border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 sm:static sm:bg-transparent sm:border-none sm:shadow-none sm:p-0">
+              <Button
+                type="submit"
+                className="w-full max-w-2xl mx-auto sm:max-w-none"
+                disabled={
+                  isSubmitting ||
+                  emailValidation.status === "checking" ||
+                  phoneValidation.status === "checking" ||
+                  emailValidation.status === "duplicate" ||
+                  phoneValidation.status === "duplicate"
+                }
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  "Registrarme"
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>

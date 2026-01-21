@@ -28,9 +28,9 @@ const baseRegistroSchema = z.object({
   profesion: z.string().optional(),
   genero: z.string().min(1, "Selecciona un género"),
   edad: z
-    .number()
-    .min(14, "La edad mínima es 14 años")
-    .max(100, "La edad máxima es 100 años"),
+    .number({ error: "Ingresa tu edad" })
+    .min(14, { error: "La edad mínima es 14 años" })
+    .max(100, { error: "La edad máxima es 100 años" }),
   perfil: z.string().min(1, "Selecciona un perfil"),
   redesSociales: z.array(redSocialSchema),
   aceptaPolitica: z.boolean(),

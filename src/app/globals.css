@@ -123,3 +123,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Botón flotante con safe-area para iOS */
+.floating-button-container {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .floating-button-container {
+    padding-bottom: 0;
+  }
+}
