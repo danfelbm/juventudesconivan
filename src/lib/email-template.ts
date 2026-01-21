@@ -55,11 +55,9 @@ export function getEmailTemplate({ nombres, apellidos }: EmailTemplateProps): st
 
     <p>Hola <span class="highlight">${nombres} ${apellidos}</span>,</p>
 
-    <p>¡Gracias por registrarte en <strong>Juventudes con Iván</strong>!</p>
+    <p>Gracias por registrarte para pertenecer a la red de <strong>Iván Presidente</strong>.</p>
 
-    <p>Tu registro ha sido recibido exitosamente. Pronto te contactaremos con más información sobre las actividades y eventos.</p>
-
-    <p>¡Juntos construimos el cambio!</p>
+    <p>Tu registro ha sido recibido exitosamente. Te contactaremos para empezar las articulaciones.</p>
 
     <div class="footer">
       <p>Este es un correo automático, por favor no respondas a este mensaje.</p>

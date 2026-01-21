@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,29 @@ import { registroFormSchema, RegistroFormValues } from "@/lib/validations";
 import { LOCALIDADES_BOGOTA, GENEROS, PERFILES } from "@/lib/constants";
 import { RedesSocialesField } from "./redes-sociales-field";
 import { PoliticaPrivacidadModal } from "./politica-privacidad-modal";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+
+// Regex patterns
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const PHONE_REGEX = /^3\d{9}$/;
+
+type ValidationStatus = "idle" | "checking" | "valid" | "invalid" | "duplicate";
+
+interface FieldValidation {
+  status: ValidationStatus;
+  message?: string;
+}
 
 export function RegistroForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Validation states
+  const [emailValidation, setEmailValidation] = useState<FieldValidation>({ status: "idle" });
+  const [phoneValidation, setPhoneValidation] = useState<FieldValidation>({ status: "idle" });
+  const [emailConfirmValidation, setEmailConfirmValidation] = useState<FieldValidation>({ status: "idle" });
+  const [phoneConfirmValidation, setPhoneConfirmValidation] = useState<FieldValidation>({ status: "idle" });
 
   const form = useForm<RegistroFormValues>({
     resolver: zodResolver(registroFormSchema),
@@ -51,9 +68,203 @@ export function RegistroForm() {
       redesSociales: [],
       aceptaPolitica: false,
     },
+    mode: "onBlur",
   });
 
+  const watchEmail = form.watch("email");
+  const watchConfirmarEmail = form.watch("confirmarEmail");
+  const watchTelefono = form.watch("telefono");
+  const watchConfirmarTelefono = form.watch("confirmarTelefono");
+
+  // Check for duplicates in database
+  const checkDuplicate = useCallback(async (tipo: "email" | "telefono", valor: string): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/verificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo, valor }),
+      });
+      const data = await response.json();
+      return data.existe;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // Validate email
+  const validateEmail = useCallback(async (email: string) => {
+    if (!email) {
+      setEmailValidation({ status: "idle" });
+      return;
+    }
+
+    // Check regex first
+    if (!EMAIL_REGEX.test(email)) {
+      setEmailValidation({
+        status: "invalid",
+        message: "Formato de email inválido"
+      });
+      return;
+    }
+
+    // Check for duplicates
+    setEmailValidation({ status: "checking" });
+    const isDuplicate = await checkDuplicate("email", email);
+
+    if (isDuplicate) {
+      setEmailValidation({
+        status: "duplicate",
+        message: "Este email ya está registrado"
+      });
+    } else {
+      setEmailValidation({ status: "valid" });
+    }
+  }, [checkDuplicate]);
+
+  // Validate phone
+  const validatePhone = useCallback(async (phone: string) => {
+    if (!phone) {
+      setPhoneValidation({ status: "idle" });
+      return;
+    }
+
+    // Check regex first
+    if (!PHONE_REGEX.test(phone)) {
+      setPhoneValidation({
+        status: "invalid",
+        message: "Debe empezar con 3 y tener 10 dígitos"
+      });
+      return;
+    }
+
+    // Check for duplicates
+    setPhoneValidation({ status: "checking" });
+    const isDuplicate = await checkDuplicate("telefono", phone);
+
+    if (isDuplicate) {
+      setPhoneValidation({
+        status: "duplicate",
+        message: "Este teléfono ya está registrado"
+      });
+    } else {
+      setPhoneValidation({ status: "valid" });
+    }
+  }, [checkDuplicate]);
+
+  // Validate email confirmation
+  useEffect(() => {
+    if (!watchConfirmarEmail) {
+      setEmailConfirmValidation({ status: "idle" });
+      return;
+    }
+
+    if (watchEmail && watchConfirmarEmail) {
+      if (watchEmail === watchConfirmarEmail) {
+        setEmailConfirmValidation({ status: "valid" });
+      } else {
+        setEmailConfirmValidation({
+          status: "invalid",
+          message: "Los emails no coinciden"
+        });
+      }
+    }
+  }, [watchEmail, watchConfirmarEmail]);
+
+  // Validate phone confirmation
+  useEffect(() => {
+    if (!watchConfirmarTelefono) {
+      setPhoneConfirmValidation({ status: "idle" });
+      return;
+    }
+
+    if (watchTelefono && watchConfirmarTelefono) {
+      if (watchTelefono === watchConfirmarTelefono) {
+        setPhoneConfirmValidation({ status: "valid" });
+      } else {
+        setPhoneConfirmValidation({
+          status: "invalid",
+          message: "Los teléfonos no coinciden"
+        });
+      }
+    }
+  }, [watchTelefono, watchConfirmarTelefono]);
+
+  // Debounced validation triggers
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (watchEmail && EMAIL_REGEX.test(watchEmail)) {
+        validateEmail(watchEmail);
+      } else if (watchEmail) {
+        setEmailValidation({
+          status: "invalid",
+          message: "Formato de email inválido"
+        });
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [watchEmail, validateEmail]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (watchTelefono && watchTelefono.length === 10) {
+        validatePhone(watchTelefono);
+      } else if (watchTelefono && watchTelefono.length > 0) {
+        setPhoneValidation({
+          status: "invalid",
+          message: "Debe empezar con 3 y tener 10 dígitos"
+        });
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [watchTelefono, validatePhone]);
+
+  // Validation indicator component
+  const ValidationIndicator = ({ validation }: { validation: FieldValidation }) => {
+    if (validation.status === "idle") return null;
+
+    if (validation.status === "checking") {
+      return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
+    }
+
+    if (validation.status === "valid") {
+      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    }
+
+    if (validation.status === "invalid" || validation.status === "duplicate") {
+      return <XCircle className="h-4 w-4 text-destructive" />;
+    }
+
+    return null;
+  };
+
+  // Custom validation message component
+  const ValidationMessage = ({ validation }: { validation: FieldValidation }) => {
+    if (validation.status === "idle" || validation.status === "checking" || validation.status === "valid") {
+      return null;
+    }
+
+    return (
+      <p className="text-sm font-medium text-destructive flex items-center gap-1 mt-1">
+        <AlertCircle className="h-3 w-3" />
+        {validation.message}
+      </p>
+    );
+  };
+
   async function onSubmit(data: RegistroFormValues) {
+    // Prevent submission if there are validation errors
+    if (emailValidation.status === "duplicate" || phoneValidation.status === "duplicate") {
+      setSubmitStatus("error");
+      setErrorMessage("El email o teléfono ya están registrados");
+      return;
+    }
+
+    if (emailValidation.status === "invalid" || phoneValidation.status === "invalid") {
+      setSubmitStatus("error");
+      setErrorMessage("Por favor corrige los errores en el formulario");
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitStatus("idle");
     setErrorMessage("");
@@ -73,6 +284,11 @@ export function RegistroForm() {
 
       setSubmitStatus("success");
       form.reset();
+      // Reset validation states
+      setEmailValidation({ status: "idle" });
+      setPhoneValidation({ status: "idle" });
+      setEmailConfirmValidation({ status: "idle" });
+      setPhoneConfirmValidation({ status: "idle" });
     } catch (error) {
       setSubmitStatus("error");
       setErrorMessage(
@@ -151,14 +367,21 @@ export function RegistroForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="tu@email.com"
-                        {...field}
-                      />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="tu@email.com"
+                          className="pr-10"
+                          {...field}
+                        />
+                      </FormControl>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <ValidationIndicator validation={emailValidation} />
+                      </div>
+                    </div>
                     <FormMessage />
+                    <ValidationMessage validation={emailValidation} />
                   </FormItem>
                 )}
               />
@@ -168,14 +391,21 @@ export function RegistroForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirmar Email *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Confirma tu email"
-                        {...field}
-                      />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Confirma tu email"
+                          className="pr-10"
+                          {...field}
+                        />
+                      </FormControl>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <ValidationIndicator validation={emailConfirmValidation} />
+                      </div>
+                    </div>
                     <FormMessage />
+                    <ValidationMessage validation={emailConfirmValidation} />
                   </FormItem>
                 )}
               />
@@ -189,10 +419,21 @@ export function RegistroForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Teléfono *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="3001234567" maxLength={10} {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          placeholder="3001234567"
+                          maxLength={10}
+                          className="pr-10"
+                          {...field}
+                        />
+                      </FormControl>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <ValidationIndicator validation={phoneValidation} />
+                      </div>
+                    </div>
                     <FormMessage />
+                    <ValidationMessage validation={phoneValidation} />
                   </FormItem>
                 )}
               />
@@ -202,14 +443,21 @@ export function RegistroForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirmar Teléfono *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Confirma tu teléfono"
-                        maxLength={10}
-                        {...field}
-                      />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          placeholder="Confirma tu teléfono"
+                          maxLength={10}
+                          className="pr-10"
+                          {...field}
+                        />
+                      </FormControl>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <ValidationIndicator validation={phoneConfirmValidation} />
+                      </div>
+                    </div>
                     <FormMessage />
+                    <ValidationMessage validation={phoneConfirmValidation} />
                   </FormItem>
                 )}
               />
@@ -403,7 +651,17 @@ export function RegistroForm() {
             )}
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                isSubmitting ||
+                emailValidation.status === "checking" ||
+                phoneValidation.status === "checking" ||
+                emailValidation.status === "duplicate" ||
+                phoneValidation.status === "duplicate"
+              }
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
