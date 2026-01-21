@@ -20,12 +20,12 @@ export function PoliticaPrivacidadModal({
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[85vh] flex flex-col gap-0 p-0">
+        <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>Política de Privacidad</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1 pr-4 max-h-[60vh]">
-          <div className="space-y-4 text-sm">
+        <ScrollArea className="flex-1 px-6 overflow-y-auto" style={{ maxHeight: "calc(85vh - 140px)" }}>
+          <div className="space-y-4 text-sm pb-4">
             <h3 className="font-bold text-base">
               1. Responsable del Tratamiento
             </h3>
@@ -80,7 +80,7 @@ export function PoliticaPrivacidadModal({
             </p>
           </div>
         </ScrollArea>
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end px-6 py-4 border-t bg-background">
           <DialogTrigger asChild>
             <Button variant="outline">Cerrar</Button>
           </DialogTrigger>
