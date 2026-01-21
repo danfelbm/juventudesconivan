@@ -422,6 +422,9 @@ export function RegistroForm() {
                     <div className="relative">
                       <FormControl>
                         <Input
+                          type="tel"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           placeholder="3001234567"
                           maxLength={10}
                           className="pr-10"
@@ -446,6 +449,9 @@ export function RegistroForm() {
                     <div className="relative">
                       <FormControl>
                         <Input
+                          type="tel"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           placeholder="Confirma tu teléfono"
                           maxLength={10}
                           className="pr-10"
