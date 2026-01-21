@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     // Enviar email de confirmación
     try {
       await resend.emails.send({
-        from: "Juventudes con Iván <onboarding@resend.dev>",
+        from: "Juventudes con Iván <contacto@juventudesconivan.co>",
         to: data.email,
         subject: "Confirmación de Registro - Juventudes con Iván",
         html: getEmailTemplate({
