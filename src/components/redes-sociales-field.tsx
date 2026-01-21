@@ -53,19 +53,29 @@ export function RedesSocialesField({ form }: RedesSocialesFieldProps) {
       )}
 
       {fields.map((field, index) => (
-        <div key={field.id} className="flex gap-2 items-start">
+        <div key={field.id} className="space-y-2 p-3 border rounded-md relative">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => remove(index)}
+            className="absolute top-1 right-1 h-8 w-8"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+
           <FormField
             control={form.control}
             name={`redesSociales.${index}.red_social`}
             render={({ field }) => (
-              <FormItem className="flex-1">
+              <FormItem>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Red social" />
+                      <SelectValue placeholder="Selecciona red social" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -85,7 +95,7 @@ export function RedesSocialesField({ form }: RedesSocialesFieldProps) {
             control={form.control}
             name={`redesSociales.${index}.valor`}
             render={({ field }) => (
-              <FormItem className="flex-[2]">
+              <FormItem>
                 <FormControl>
                   <Input placeholder="Usuario o URL" {...field} />
                 </FormControl>
@@ -93,16 +103,6 @@ export function RedesSocialesField({ form }: RedesSocialesFieldProps) {
               </FormItem>
             )}
           />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(index)}
-            className="shrink-0"
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
         </div>
       ))}
     </div>

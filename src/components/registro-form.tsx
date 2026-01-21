@@ -301,9 +301,9 @@ export function RegistroForm() {
 
   if (submitStatus === "success") {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center justify-center py-10 text-center">
+      <Card className="w-full max-w-2xl mx-auto border-0 sm:border shadow-none sm:shadow-sm">
+        <CardContent className="pt-6 px-3 sm:px-6">
+          <div className="flex flex-col items-center justify-center py-6 sm:py-10 text-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
             <h2 className="text-2xl font-bold mb-2">¡Registro exitoso!</h2>
             <p className="text-muted-foreground mb-6">
@@ -320,17 +320,17 @@ export function RegistroForm() {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">
+    <Card className="w-full max-w-2xl mx-auto border-0 sm:border shadow-none sm:shadow-sm">
+      <CardHeader className="px-3 sm:px-6 pb-4">
+        <CardTitle className="text-xl sm:text-2xl text-center">
           Formulario de Registro
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
             {/* Nombres y Apellidos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="nombres"
@@ -360,7 +360,7 @@ export function RegistroForm() {
             </div>
 
             {/* Email y Confirmación */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="email"
@@ -412,7 +412,7 @@ export function RegistroForm() {
             </div>
 
             {/* Teléfono y Confirmación */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="telefono"
@@ -493,7 +493,7 @@ export function RegistroForm() {
             />
 
             {/* Organización y Profesión */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="organizacion"
@@ -526,7 +526,7 @@ export function RegistroForm() {
             </div>
 
             {/* Género, Edad, Perfil */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="genero"
